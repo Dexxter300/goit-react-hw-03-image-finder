@@ -113,7 +113,7 @@ export class App extends Component {
     }
 
     if (status === 'resolved') {
-      console.log(this.state.currentImg);
+      // console.log(this.state.currentImg);
       return (
         <div>
           {showModal && (
