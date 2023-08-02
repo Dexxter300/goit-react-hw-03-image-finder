@@ -13,6 +13,7 @@ export class App extends Component {
     error: null,
     showModal: false,
     currentImg: null,
+    visible: true,
   };
   inputText = '';
   page = 1;
@@ -42,6 +43,7 @@ export class App extends Component {
   }
 
   handleSubmit = (e, promt) => {
+    this.page = 1;
     this.setState({ status: 'pending' });
     this.inputText = promt;
     e.preventDefault();
@@ -57,6 +59,18 @@ export class App extends Component {
           imgs: res.hits,
           status: 'resolved',
         });
+        return res;
+      })
+      .then(res => {
+        if (this.state.imgs.length >= res.totalHits) {
+          this.setState({
+            visible: false,
+          });
+        } else {
+          this.setState({
+            visible: true,
+          });
+        }
       })
       .catch(error => {
         this.setState({ error, status: 'rejected' });
@@ -66,11 +80,25 @@ export class App extends Component {
   handleLoadMore = () => {
     this.page = this.page + 1;
     // пофиксить страницы
-    this.findPics({ page: this.page, promt: this.inputText }).then(res => {
-      this.setState(prevState => {
-        return { imgs: [...prevState.imgs, ...res.hits] };
+    this.findPics({ page: this.page, promt: this.inputText })
+      .then(res => {
+        this.setState(prevState => {
+          return { imgs: [...prevState.imgs, ...res.hits] };
+        });
+        console.log(res);
+        return res;
+      })
+      .then(res => {
+        if (this.state.imgs.length >= res.totalHits) {
+          this.setState({
+            visible: false,
+          });
+        } else {
+          this.setState({
+            visible: true,
+          });
+        }
       });
-    });
   };
 
   toggleModal = currentImg => {
@@ -124,7 +152,9 @@ export class App extends Component {
           )}
           <Searchbar onSubmit={this.handleSubmit}></Searchbar>
           <List imgs={imgs} onOpen={this.toggleModal}></List>
-          <Button loadMore={this.handleLoadMore}></Button>
+          {this.state.visible && (
+            <Button loadMore={this.handleLoadMore}></Button>
+          )}
         </div>
       );
     }
